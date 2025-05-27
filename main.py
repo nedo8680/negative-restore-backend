@@ -11,7 +11,7 @@ if __name__ == "__main__":
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # o "*" durante desarrollo
+    allow_origins=["https://negative-restore-backend.onrender.com","https://negative-restore.netlify.app","http://localhost:5173"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
