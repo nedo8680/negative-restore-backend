@@ -15,4 +15,5 @@ typing_extensions==4.12.2
 uvicorn==0.33.0
 fastapi
 uvicorn[standard]
+opencv-python-headless
 
