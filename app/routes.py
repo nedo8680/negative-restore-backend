@@ -7,7 +7,9 @@ from app.services.image_processing import process_image  # Importamos la funció
 from fastapi.responses import FileResponse
 from datetime import datetime
 from app.utils.cleanup import delete_old_files  # Limpieza
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 # Creamos un router para manejar las rutas
@@ -28,9 +30,9 @@ MIN_DONATION = 2.50
 DONATIONS_FILE = "donations.json"
 
 class ContactMessage(BaseModel):
-    name: str
+    name: str = Field(..., min_length=2, max_length=50)
     email: EmailStr
-    message: str
+    message: str = Field(..., min_length=10, max_length=1000)
 
 # Ruta para el contacto
 @router.post("/contact")
@@ -50,12 +52,14 @@ async def receive_contact_message(data: ContactMessage):
             }, f, indent=2)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to save message.")
+    
+    api_key = os.getenv("SENDGRID_API_KEY")
 
     # 2. Enviar email con SendGrid (asegúrate de configurar la API key en Render)
     try:
         message = Mail(
-            from_email="no-reply@negativerestore.com",  # Cambia esto
-            to_emails="tucorreo@tudominio.com",          # Cambia esto también
+            from_email="edwinfuentes8680@gmail.com",  # Cambia esto
+            to_emails="edwinfuentes8680@gmail.com",          # Cambia esto también
             subject="📩 New Contact Form Message",
             html_content=f"""
                 <p><strong>Name:</strong> {data.name}</p>
@@ -66,7 +70,7 @@ async def receive_contact_message(data: ContactMessage):
                 <p>Received at: {timestamp} UTC</p>
             """
         )
-        sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
+        sg = SendGridAPIClient(api_key)
         sg.send(message)
     except Exception as e:
         print(f"SendGrid error: {e}")
