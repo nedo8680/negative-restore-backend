@@ -35,23 +35,44 @@ class ContactMessage(BaseModel):
 # Ruta para el contacto
 @router.post("/contact")
 async def receive_contact_message(data: ContactMessage):
-    # Guardar mensaje en un archivo o base de datos
-    message_entry = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "name": data.name,
-        "email": data.email,
-        "message": data.message,
-    }
+    timestamp = datetime.utcnow().isoformat()
 
-    # Guardar en un JSON por simplicidad
-    os.makedirs("messages", exist_ok=True)
-    filename = f"messages/{int(datetime.utcnow().timestamp())}.json"
-    with open(filename, "w") as f:
-        json.dump(message_entry, f, indent=2)
+    # 1. Guardar mensaje localmente (opcional)
+    try:
+        os.makedirs("messages", exist_ok=True)
+        filename = f"messages/{int(datetime.utcnow().timestamp())}.json"
+        with open(filename, "w") as f:
+            json.dump({
+                "timestamp": timestamp,
+                "name": data.name,
+                "email": data.email,
+                "message": data.message,
+            }, f, indent=2)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to save message.")
 
-    # (Opcional) aquí podrías enviar un correo con sendgrid/smtp
+    # 2. Enviar email con SendGrid (asegúrate de configurar la API key en Render)
+    try:
+        message = Mail(
+            from_email="no-reply@negativerestore.com",  # Cambia esto
+            to_emails="tucorreo@tudominio.com",          # Cambia esto también
+            subject="📩 New Contact Form Message",
+            html_content=f"""
+                <p><strong>Name:</strong> {data.name}</p>
+                <p><strong>Email:</strong> {data.email}</p>
+                <p><strong>Message:</strong></p>
+                <p>{data.message}</p>
+                <hr>
+                <p>Received at: {timestamp} UTC</p>
+            """
+        )
+        sg = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
+        sg.send(message)
+    except Exception as e:
+        print(f"SendGrid error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to send email.")
 
-    return {"message": "Mensaje recibido"}
+    return {"message": "Message received successfully. We will get back to you soon."}
 
 # Ruta para subir imágenes
 @router.post("/upload/")
