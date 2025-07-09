@@ -21,7 +21,7 @@ PROCESSED_FOLDER = "processed/"
 
 # Tipos de imagen permitidos
 VALID_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
-MAX_FILE_SIZE_MB = 5  # tamaño máximo en megabytes
+MAX_FILE_SIZE_MB = 4  # tamaño máximo en megabytes
 
 # Donación mínima para el uso de la API
 # Esta variable se puede usar para validar donaciones en el futuro
@@ -85,20 +85,20 @@ async def upload_image(file: UploadFile = File(...), background_tasks: Backgroun
     
     # Verificar tipo de archivo
     if file.content_type not in VALID_IMAGE_TYPES:
-        raise HTTPException(status_code=400, detail="Formato de imagen no válido. Solo JPG y PNG permitidos.")
+        raise HTTPException(status_code=400, detail="Invalid image format. Only JPG and PNG are allowed.")
 
     contents = await file.read()
 
     # Validar tamaño
     size_mb = len(contents) / (1024 * 1024)
     if size_mb > MAX_FILE_SIZE_MB:
-        raise HTTPException(status_code=400, detail=f"El archivo excede el tamaño máximo permitido de {MAX_FILE_SIZE_MB} MB.")
+        raise HTTPException(status_code=400, detail=f"The file exceeds the maximum allowed size {MAX_FILE_SIZE_MB} MB.")
 
     # Validar que sea una imagen real
     try:
         Image.open(BytesIO(contents)).verify()
     except Exception:
-        raise HTTPException(status_code=400, detail="El archivo no es una imagen válida.")
+        raise HTTPException(status_code=400, detail="The file is not a valid image.")
 
     # Guardar la imagen
     file_path = os.path.join(UPLOAD_FOLDER, file.filename)

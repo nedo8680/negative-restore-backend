@@ -11,7 +11,7 @@ app = FastAPI()
 # Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://negative-restore-backend.onrender.com",
+    allow_origins=[
                    "https://negativerestore.com",
                    "https://www.negativerestore.com",
                    "https://negative-restore.netlify.app",
@@ -22,6 +22,9 @@ app.add_middleware(
 )
 
 app.include_router(router)
+
+# Montar la carpeta uploads como estática
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 if __name__ == "__main__":
     import uvicorn
