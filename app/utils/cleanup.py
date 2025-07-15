@@ -3,7 +3,7 @@ import time
 import logging
 from logging.handlers import RotatingFileHandler
 
-MAX_FILE_AGE_SECONDS = 7200  # 2 horas
+MAX_FILE_AGE_SECONDS = 28800 # 8 horas
 FOLDERS_TO_CLEAN = ["uploads", "processed"]
 
 # Configuración del logger con rotación

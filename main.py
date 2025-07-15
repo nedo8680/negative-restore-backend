@@ -3,6 +3,7 @@ load_dotenv()
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles 
 from app.routes import router
 
 
@@ -23,7 +24,7 @@ app.add_middleware(
 
 app.include_router(router)
 
-# Montar la carpeta uploads como estática
+# Montar la carpeta uploads como estática, lo que permite acceder a las imágenes subidas 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 if __name__ == "__main__":
